@@ -4,11 +4,7 @@ import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import java.util.Properties
 import scala.io.Source.fromURL
 
-class weatherDataProducer {
-  //API URL to Get weather data
-  val url = "https://api.openweathermap.org/data/2.5/onecall?lat=12.9716&lon=77.5946&exclude=minutely,hourly,daily,alerts&appid=7f9e75dbfba0b07fe2e4e79fc4457342&units=metrics"
-  //Data which needs to extracted from the json output (API output)
-  val dataList: List[String] =  List("lat","lon","timezone","dt","sunrise","sunset","temp","humidity","dew_point","visibility","wind_speed")
+class weatherDataProducer(url: String, dataList: List[String]) {
   
   //Function to Featch data using URL -
   // Takes no parameters and return JSON data as string format
@@ -19,10 +15,7 @@ class weatherDataProducer {
   //Function to format API output JSON data
   // takes JSON as string and return JSON as out[ut
   def formatJSONData(jsonStr: String): String = {
-
-    val start = """{"""
-    val end = """}"""
-    var json = jsonStr.mkString
+     var json = jsonStr.mkString
       .replace("{", "")
       .replace("}", "")
       .replace("]", "")
@@ -31,7 +24,7 @@ class weatherDataProducer {
       .replace("\"weather\":", "")
       .split(",")
       .toList
-    json.filter(isin).mkString(start, ",", end)
+    json.filter(isin).mkString("""{""", ",", """}""")
   }
   // Function to write JSON data to Kafka Topic
   def writeToKafka(topic: String, serverName: String, port: Int): Unit = {
@@ -49,7 +42,5 @@ class weatherDataProducer {
     producer.send(record)
     //close KafkaProducer session
     producer.close()
-  }
-
-  
+  } 
 }
